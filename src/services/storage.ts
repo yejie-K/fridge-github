@@ -68,7 +68,7 @@ export class LocalStorageService {
   }
 
   // Helper to save items
-  private static saveItems(items: FoodItem[]): void {
+  static saveItems(items: FoodItem[]): void {
     try {
       localStorage.setItem(STORAGE_KEYS.FOOD_ITEMS, JSON.stringify(items));
       // Dispatch a custom event to notify listeners of changes

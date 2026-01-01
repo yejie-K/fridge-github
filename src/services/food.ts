@@ -15,7 +15,12 @@ export class FoodService {
         console.warn('Supabase list error, falling back to local:', error.message);
         return LocalStorageService.getFoodItems();
       }
-      return (data ?? []) as FoodItem[];
+      
+      // Cache the fresh data to local storage
+      const items = (data ?? []) as FoodItem[];
+      LocalStorageService.saveItems(items);
+      
+      return items;
     }
     return LocalStorageService.getFoodItems();
   }
