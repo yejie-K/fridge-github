@@ -22,11 +22,15 @@ export class FoodService {
 
   static async create(item: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<FoodItem> {
     if (isSupabaseEnabled && supabase) {
+      // Get current user nickname from local storage (set during login)
+      const nickname = localStorage.getItem('user_nickname') || undefined;
+      
       const payload: FoodItem = {
         ...item,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        createdBy: nickname,
       };
       const { data, error } = await supabase.from(TABLE).insert(payload).select().single();
       if (error || !data) {

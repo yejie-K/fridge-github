@@ -19,6 +19,7 @@ export interface FoodItem {
   expiryTime?: string; // ISO date string
   createdAt: string;
   updatedAt: string;
+  createdBy?: string; // Nickname of the user who added the item
 }
 
 export const CATEGORY_LABELS: Record<Category, string> = {
