@@ -20,3 +20,12 @@
 - 构建脚本与输出：见 [package.json](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/package.json#L6-L12)
 - Vite 配置：见 [vite.config.ts](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/vite.config.ts)
 - 应用入口：见 [index.html](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/index.html)
+
+## 接入后端（Supabase）
+- 环境变量：复制 `.env.example` 为 `.env.local`，并填入：
+  - `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`
+- 数据存储策略：前端优先使用 Supabase；未配置或失败时回退 LocalStorage。
+- 代码入口：
+  - 客户端配置：[supabase.ts](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/src/lib/supabase.ts)
+  - 存储服务：[food.ts](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/src/services/food.ts)
+  - 业务 Hook：[useFoodItems.ts](file:///Users/yyy/Desktop/智能冰箱管家/fridge-github/src/hooks/useFoodItems.ts)

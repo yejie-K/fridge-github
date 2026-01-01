@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FoodItem } from '../types';
-import { LocalStorageService } from '../services/storage';
+import { FoodService } from '../services/food';
 
 export function useFoodItems() {
   const [items, setItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchItems = useCallback(() => {
-    const data = LocalStorageService.getFoodItems();
-    // Sort by entry time descending (newest first)
+  const fetchItems = useCallback(async () => {
+    const data = await FoodService.list();
     data.sort((a, b) => new Date(b.entryTime).getTime() - new Date(a.entryTime).getTime());
     setItems(data);
     setLoading(false);
@@ -32,16 +31,16 @@ export function useFoodItems() {
     };
   }, [fetchItems]);
 
-  const addItem = useCallback((item: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>) => {
-    return LocalStorageService.addFoodItem(item);
+  const addItem = useCallback(async (item: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>) => {
+    return FoodService.create(item);
   }, []);
 
-  const updateItem = useCallback((id: string, updates: Partial<FoodItem>) => {
-    return LocalStorageService.updateFoodItem(id, updates);
+  const updateItem = useCallback(async (id: string, updates: Partial<FoodItem>) => {
+    return FoodService.update(id, updates);
   }, []);
 
-  const deleteItem = useCallback((id: string) => {
-    return LocalStorageService.deleteFoodItem(id);
+  const deleteItem = useCallback(async (id: string) => {
+    return FoodService.remove(id);
   }, []);
 
   return {
