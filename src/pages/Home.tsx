@@ -3,14 +3,28 @@ import { Layout } from '../components/Layout';
 import { InputSection } from '../components/InputSection';
 import { FoodCard } from '../components/FoodCard';
 import { useFoodItems } from '../hooks/useFoodItems';
-import { Category, CATEGORY_LABELS, CATEGORY_EMOJIS } from '../types';
+import { Category, CATEGORY_LABELS, CATEGORY_EMOJIS, FoodItem } from '../types';
 import clsx from 'clsx';
-import { Search } from 'lucide-react';
+import { Search, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Home: React.FC = () => {
   const { items, loading } = useFoodItems();
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // 智能过期检测 (3天内过期)
+  const expiringItems = useMemo(() => {
+    const now = new Date();
+    const threeDaysLater = new Date();
+    threeDaysLater.setDate(now.getDate() + 3);
+
+    return items.filter(item => {
+      if (!item.expiryTime) return false;
+      const expiry = new Date(item.expiryTime);
+      return expiry <= threeDaysLater && expiry >= new Date(new Date().setDate(now.getDate() - 1)); // 包含今天过期和未来3天
+    }).sort((a, b) => new Date(a.expiryTime!).getTime() - new Date(b.expiryTime!).getTime());
+  }, [items]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -36,12 +50,38 @@ export const Home: React.FC = () => {
 
   return (
     <Layout>
+      {/* 🚨 智能过期看板 (仅当有即将过期物品时显示) */}
+      {expiringItems.length > 0 && (
+        <div className="mb-6 bg-red-50 border border-red-100 rounded-2xl p-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center text-red-700 font-bold">
+              <AlertTriangle className="w-5 h-5 mr-2 animate-pulse" />
+              急需处理 ({expiringItems.length})
+            </div>
+            <Link to="/stats" className="text-xs text-red-500 flex items-center hover:underline">
+              查看全部 <ChevronRight className="w-3 h-3 ml-0.5" />
+            </Link>
+          </div>
+          <div className="flex space-x-3 overflow-x-auto pb-2 no-scrollbar">
+            {expiringItems.slice(0, 5).map(item => (
+              <div key={item.id} className="flex-shrink-0 w-24 bg-white rounded-xl p-2 shadow-sm border border-red-100 relative">
+                <div className="text-2xl mb-1 text-center">{CATEGORY_EMOJIS[item.category]}</div>
+                <div className="text-xs font-medium text-gray-800 truncate text-center">{item.name}</div>
+                <div className="text-[10px] text-red-500 text-center font-medium mt-1">
+                  {new Date(item.expiryTime!).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })} 到期
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <InputSection />
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-4 group">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search size={18} className="text-gray-400" />
+          <Search size={18} className="text-gray-400 group-focus-within:text-primary transition-colors" />
         </div>
         <input
           type="text"
