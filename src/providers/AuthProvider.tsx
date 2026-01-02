@@ -17,16 +17,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const nickname = localStorage.getItem('user_nickname') || '家人';
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          nickname,
-        });
+      try {
+        // 先尝试从本地恢复 Session，减少等待时间
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const nickname = localStorage.getItem('user_nickname') || '家人';
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            nickname,
+          });
+        }
+      } catch (e) {
+        console.error('Session init error:', e);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     init();

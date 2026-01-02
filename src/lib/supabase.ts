@@ -11,6 +11,13 @@ const url = isProd ? `${window.location.origin}/api/supabase` : envUrl;
 export const isSupabaseEnabled = Boolean(envUrl && anon);
 
 export const supabase = isSupabaseEnabled
-  ? createClient(url!, anon!)
+  ? createClient(url!, anon!, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false, // 避免 URL 干扰
+        storage: localStorage // 明确指定存储位置
+      }
+    })
   : undefined as any;
 
